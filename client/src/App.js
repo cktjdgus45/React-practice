@@ -9,6 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import {withStyles} from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import CustomerAdd from './component/CustomerAdd';
 
 const styles = theme => ({
   root: {
@@ -33,6 +34,15 @@ class App extends Component {
     completed:0
   }
 
+  stateRefresh = () =>{
+    this.setState({
+      customers:'',
+      completed:0
+    });
+    this.callApi()
+    .then(res=>this.setState({customers:res}))
+    .catch(err=>console.log(err));
+  }
 
   componentDidMount(){
     this.timer = setInterval(this.progress, 20);
@@ -40,6 +50,7 @@ class App extends Component {
     .then(res=>this.setState({customers:res}))
     .catch(err=>console.log(err));
   }
+
   callApi = async ()=>{
     const response = await fetch('/api/customers');
     const body = await response.json();
@@ -53,26 +64,30 @@ class App extends Component {
   render(){
     const {classes} =this.props;
   return (
-    <Paper className={classes.root}>
-     <Table className={classes.table}>
+    <div>
+     <Paper className={classes.root}>
+      <Table className={classes.table}>
        <TableHead>
          <TableRow>
            <TableCell>번호</TableCell><TableCell>이미지</TableCell><TableCell>이름</TableCell><TableCell>생년월일</TableCell><TableCell>성별</TableCell><TableCell>직업</TableCell>
          </TableRow>
        </TableHead>
-       <TableBody>
+        <TableBody>
         {this.state.customers ? this.state.customers.map(customers=>{
           return(<Customer key={customers.id} id={customers.id}  image={customers.image}  name={customers.name}   birthday={customers.birthday}   gender={customers.gender}   job={customers.job} />)})
         :
-        <TableRow>
-          <TableCell colspan="6"align="center">
+         < TableRow>
+           <TableCell colspan="6"align="center">
              <CircularProgress className={classes.progress} variant="determinate"value={this.state.completed}/>
-          </TableCell>
-        </TableRow>
+           </TableCell>
+         </TableRow>
           }
-       </TableBody> 
-     </Table>
-    </Paper>
+        </TableBody> 
+       </Table>
+     </Paper>
+     <CustomerAdd stateRefresh={this.stateRefresh}/>
+    </div>
+   
   );}
   }
   export default withStyles(styles)(App);
